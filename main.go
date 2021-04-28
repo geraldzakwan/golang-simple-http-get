@@ -41,10 +41,9 @@ func loadData() Data {
   var data Data
   json.Unmarshal([]byte(byteValue), &data)
 
-  // for i := range data.Data {
-  //   log.Println(data.Data[i].ID)
-  //   log.Println(data.Data[i].Name)
-  // }
+  for i := range data {
+    log.Println("ID: ", data[i].ID, "Name: ", data[i].Name)
+  }
 
   return data
 }
@@ -52,21 +51,21 @@ func loadData() Data {
 func dataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
   return func(w http.ResponseWriter, r *http.Request) {
     if r.URL.Path != "/" {
-      http.Error(w, "404 not found.", http.StatusNotFound)
+      http.Error(w, "Invalid URL path, use root index", http.StatusNotFound)
       return
     }
 
     if r.Method != "GET" {
-      http.Error(w, "Method is not supported.", http.StatusNotFound)
+      http.Error(w, "Method is not supported, use GET", http.StatusNotFound)
       return
     }
 
     w.Header().Set("Content-Type", "application/json")
 
-    ids := r.URL.Query().Get("id")
+    ids, exist := r.URL.Query()["id"]
 
     // Case 1: Request without parameter id
-    if ids == "" {
+    if !exist {
       jsonData, err := json.Marshal(Response{
         Code: http.StatusOK,
         Data: data,
@@ -81,7 +80,7 @@ func dataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
       return
     }
 
-    idList := strings.Split(ids, ",")
+    idList := strings.Split(ids[0], ",")
 
     // Case 2 and 3: Request with single or multiple ids
     var returnData Data
