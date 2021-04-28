@@ -4,6 +4,7 @@ import (
   "os"
   "log"
   "strings"
+  "strconv"
   "io/ioutil"
   "encoding/json"
   "net/http"
@@ -54,7 +55,7 @@ func dataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
 
     ids := r.URL.Query().Get("id")
 
-    // Case 1: Request without parameter "id"
+    // Case 1: Request without parameter id
     if ids == "" {
       for i := range data {
         log.Println(data[i].ID)
@@ -68,9 +69,27 @@ func dataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
       }
 
       w.Write(jsonData)
-    } else {
-      idList := strings.Split(ids, ",")
-      log.Println(idList)
+      return
+    }
+
+    idList := strings.Split(ids, ",")
+
+    // Case 2: Request with single id
+    if len(idList) == 1 {
+      idx, err := strconv.Atoi(idList[0])
+      if err != nil {
+          http.Error(w, err.Error(), http.StatusInternalServerError)
+          return
+      }
+
+      jsonData, err := json.Marshal(data[idx - 1])
+      if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+      }
+
+      w.Write(jsonData)
+      return
     }
   }
 }
