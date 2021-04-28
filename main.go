@@ -91,6 +91,29 @@ func dataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
       w.Write(jsonData)
       return
     }
+
+    // Case 2: Request with multiple ids
+
+    var returnData Data
+
+    for i := range idList {
+      idx, err := strconv.Atoi(idList[i])
+      if err != nil {
+          http.Error(w, err.Error(), http.StatusInternalServerError)
+          return
+      }
+
+      returnData = append(returnData, data[idx - 1])
+    }
+
+    jsonData, err := json.Marshal(returnData)
+    if err != nil {
+      http.Error(w, err.Error(), http.StatusInternalServerError)
+      return
+    }
+
+    w.Write(jsonData)
+    return
   }
 }
 
