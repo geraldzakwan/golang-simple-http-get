@@ -60,7 +60,8 @@ func dataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
       return
     }
 
-    w.Header().Set("Content-Type", "application/json")
+    w.Header().Set("Content-Type", "application/json; charset=utf-8")
+    w.Header().Set("X-Content-Type-Options", "nosniff")
 
     ids, exist := r.URL.Query()["id"]
 
@@ -76,6 +77,7 @@ func dataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
         return
       }
 
+      w.WriteHeader(http.StatusOK)
       w.Write(jsonData)
       return
     }
@@ -87,9 +89,22 @@ func dataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
 
     for i := range idList {
       idx, err := strconv.Atoi(idList[i])
+
+      // Case 4: Request with invalid ID
       if err != nil {
+        jsonError, err := json.Marshal(Error{
+          Code: http.StatusBadRequest,
+          Message: "Invalid or empty ID: \"" + idList[i] + "\"",
+        })
+
+        if err != nil {
           http.Error(w, err.Error(), http.StatusInternalServerError)
           return
+        }
+
+        w.WriteHeader(http.StatusBadRequest)
+        w.Write(jsonError)
+        return
       }
 
       returnData = append(returnData, data[idx - 1])
@@ -105,6 +120,7 @@ func dataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
       return
     }
 
+    w.WriteHeader(http.StatusOK)
     w.Write(jsonData)
     return
   }
