@@ -8,7 +8,7 @@ import (
 
 // Case 1: Request without parameter id
 func TestCase1(t *testing.T){
-  data := loadData()
+  data, dataMap := loadData()
 
   req, err := http.NewRequest("GET", "/", nil)
 	if err != nil {
@@ -16,7 +16,7 @@ func TestCase1(t *testing.T){
 	}
 
 	rec := httptest.NewRecorder()
-	handler := http.HandlerFunc(DataHandler(data))
+	handler := http.HandlerFunc(DataHandler(data, dataMap))
 	handler.ServeHTTP(rec, req)
 	if status := rec.Code; status != http.StatusOK {
 		t.Errorf("Handler returned wrong status code: got %v want %v",
@@ -32,7 +32,7 @@ func TestCase1(t *testing.T){
 
 // Case 2: Request with single id
 func TestCase2(t *testing.T){
-  data := loadData()
+  data, dataMap := loadData()
 
   req, err := http.NewRequest("GET", "/?id=2", nil)
 	if err != nil {
@@ -40,7 +40,7 @@ func TestCase2(t *testing.T){
 	}
 
 	rec := httptest.NewRecorder()
-	handler := http.HandlerFunc(DataHandler(data))
+	handler := http.HandlerFunc(DataHandler(data, dataMap))
 	handler.ServeHTTP(rec, req)
 	if status := rec.Code; status != http.StatusOK {
 		t.Errorf("Handler returned wrong status code: got %v want %v",
@@ -56,7 +56,7 @@ func TestCase2(t *testing.T){
 
 // Case 3: Request with multiple ids
 func TestCase3(t *testing.T){
-  data := loadData()
+  data, dataMap := loadData()
 
   req, err := http.NewRequest("GET", "/?id=1,3,4", nil)
 	if err != nil {
@@ -64,7 +64,7 @@ func TestCase3(t *testing.T){
 	}
 
 	rec := httptest.NewRecorder()
-	handler := http.HandlerFunc(DataHandler(data))
+	handler := http.HandlerFunc(DataHandler(data, dataMap))
 	handler.ServeHTTP(rec, req)
 	if status := rec.Code; status != http.StatusOK {
 		t.Errorf("Handler returned wrong status code: got %v want %v",
@@ -80,7 +80,7 @@ func TestCase3(t *testing.T){
 
 // Case 4: Request with invalid ID
 func TestCase4(t *testing.T){
-  data := loadData()
+  data, dataMap := loadData()
 
   req, err := http.NewRequest("GET", "/?id=xxx", nil)
 	if err != nil {
@@ -88,7 +88,7 @@ func TestCase4(t *testing.T){
 	}
 
 	rec := httptest.NewRecorder()
-	handler := http.HandlerFunc(DataHandler(data))
+	handler := http.HandlerFunc(DataHandler(data, dataMap))
 	handler.ServeHTTP(rec, req)
 	if status := rec.Code; status != http.StatusBadRequest {
 		t.Errorf("Handler returned wrong status code: got %v want %v",
@@ -104,7 +104,7 @@ func TestCase4(t *testing.T){
 
 // Case 5: Request with ID not found
 func TestCase5(t *testing.T){
-  data := loadData()
+  data, dataMap := loadData()
 
   req, err := http.NewRequest("GET", "/?id=4", nil)
 	if err != nil {
@@ -112,7 +112,7 @@ func TestCase5(t *testing.T){
 	}
 
 	rec := httptest.NewRecorder()
-	handler := http.HandlerFunc(DataHandler(data))
+	handler := http.HandlerFunc(DataHandler(data, dataMap))
 	handler.ServeHTTP(rec, req)
 	if status := rec.Code; status != http.StatusNotFound {
 		t.Errorf("Handler returned wrong status code: got %v want %v",

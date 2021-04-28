@@ -27,7 +27,7 @@ type Error struct {
   Message string `json:"message"`
 }
 
-func loadData() Data {
+func loadData() (Data, map[int] Datum) {
   jsonFile, err := os.Open("data.json")
   if err != nil {
     log.Println(err)
@@ -41,14 +41,17 @@ func loadData() Data {
   var data Data
   json.Unmarshal([]byte(byteValue), &data)
 
+  dataMap := make(map[int] Datum)
+
   for i := range data {
     log.Println("ID: ", data[i].ID, "Name: ", data[i].Name)
+    dataMap[data[i].ID] = data[i]
   }
 
-  return data
+  return data, dataMap
 }
 
-func DataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
+func DataHandler(data Data, dataMap map[int] Datum) func(w http.ResponseWriter, r *http.Request) {
   return func(w http.ResponseWriter, r *http.Request) {
     if r.URL.Path != "/" {
       http.Error(w, "Invalid URL path, use root index", http.StatusNotFound)
@@ -147,8 +150,8 @@ func DataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
       }
 
       // Only return found ids
-      if idx - 1 > -1 && idx - 1 < 3 {
-        returnData = append(returnData, data[idx - 1])
+      if val, ok := dataMap[idx]; ok {
+        returnData = append(returnData, val)
       }
     }
 
@@ -169,9 +172,9 @@ func DataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-  data := loadData()
+  data, dataMap := loadData()
 
-  http.HandleFunc("/", DataHandler(data))
+  http.HandleFunc("/", DataHandler(data, dataMap))
 
   log.Println("Starting server at port 8080")
   if err := http.ListenAndServe(":8080", nil); err != nil {
