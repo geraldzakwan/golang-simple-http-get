@@ -2,7 +2,7 @@ package main
 
 import (
   "os"
-  "fmt"
+  "log"
   "io/ioutil"
   "encoding/json"
 )
@@ -12,22 +12,26 @@ type Data struct {
 }
 
 type Datum struct {
-  ID string `json:"id"`
+  ID int `json:"id"`
   Name string `json:"name"`
 }
 
 func main() {
-    jsonFile, err := os.Open("data.json");
+  jsonFile, err := os.Open("data.json")
+  if err != nil {
+    log.Println(err)
+  }
 
-    if err != nil {
-        fmt.Println(err)
-    }
+  byteValue, _ := ioutil.ReadAll(jsonFile)
+  jsonFile.Close()
 
-    defer jsonFile.Close()
+  log.Println("Data is succesfully loaded")
 
-    byteValue, _ := ioutil.ReadAll(jsonFile)
-    var result map[string]interface{}
+  var result Data
+  json.Unmarshal([]byte(byteValue), &result)
 
-    json.Unmarshal([]byte(byteValue), &result)
-    fmt.Println(result["data"])
+  for i := range result.Data {
+    log.Println(result.Data[i].ID)
+    log.Println(result.Data[i].Name)
+  }
 }
