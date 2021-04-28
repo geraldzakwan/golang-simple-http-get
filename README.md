@@ -16,7 +16,7 @@
 2021/04/28 17:16:31 Starting server at port 8080
 ```
 
-## How to Run Automated Test
+## How to Test Automatically
 
 - To do an automated test, run the following command:
 
@@ -49,9 +49,11 @@ PASS
 ok  	golang-simple-get-http	0.523s
 ```
 
-## How to Run Manual Test
+## How to Test Manually
 
-- To test manually, below are five examples using `curl` (and the response) for each test case:
+- Start the server
+
+- Below are five examples using `curl` command to run each test case:
 
 1. `curl -i localhost:8080`
 
