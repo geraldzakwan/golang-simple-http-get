@@ -8,9 +8,7 @@ import (
   "net/http"
 )
 
-type Data struct {
-  Data []Datum `json:"data"`
-}
+type Data []Datum
 
 type Datum struct {
   ID int `json:"id"`
@@ -53,9 +51,9 @@ func dataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
 
     // Case 1: Request without parameter "id"
     if _, ok := r.URL.Query()["id"]; !ok {
-      for i := range data.Data {
-        log.Println(data.Data[i].ID)
-        log.Println(data.Data[i].Name)
+      for i := range data {
+        log.Println(data[i].ID)
+        log.Println(data[i].Name)
       }
     }
   }
