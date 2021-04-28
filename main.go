@@ -107,6 +107,22 @@ func dataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
         return
       }
 
+      if idx - 1 < 0 || idx - 1 > 2 {
+        jsonError, err := json.Marshal(Error{
+          Code: http.StatusNotFound,
+          Message: "Resource with ID: " + idList[i] + " doesn't exist",
+        })
+
+        if err != nil {
+          http.Error(w, err.Error(), http.StatusInternalServerError)
+          return
+        }
+
+        w.WriteHeader(http.StatusNotFound)
+        w.Write(jsonError)
+        return
+      }
+
       returnData = append(returnData, data[idx - 1])
     }
 
