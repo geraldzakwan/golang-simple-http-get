@@ -3,6 +3,7 @@ package main
 import (
   "os"
   "log"
+  "strings"
   "io/ioutil"
   "encoding/json"
   "net/http"
@@ -49,12 +50,27 @@ func dataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
       return
     }
 
+    w.Header().Set("Content-Type", "application/json")
+
+    ids := r.URL.Query().Get("id")
+
     // Case 1: Request without parameter "id"
-    if _, ok := r.URL.Query()["id"]; !ok {
+    if ids == "" {
       for i := range data {
         log.Println(data[i].ID)
         log.Println(data[i].Name)
       }
+
+      jsonData, err := json.Marshal(data)
+      if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+      }
+
+      w.Write(jsonData)
+    } else {
+      idList := strings.Split(ids, ",")
+      log.Println(idList)
     }
   }
 }
