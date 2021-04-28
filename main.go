@@ -74,26 +74,7 @@ func dataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
 
     idList := strings.Split(ids, ",")
 
-    // Case 2: Request with single id
-    if len(idList) == 1 {
-      idx, err := strconv.Atoi(idList[0])
-      if err != nil {
-          http.Error(w, err.Error(), http.StatusInternalServerError)
-          return
-      }
-
-      jsonData, err := json.Marshal(data[idx - 1])
-      if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-      }
-
-      w.Write(jsonData)
-      return
-    }
-
-    // Case 2: Request with multiple ids
-
+    // Case 2 and 3: Request with single or multiple ids
     var returnData Data
 
     for i := range idList {
