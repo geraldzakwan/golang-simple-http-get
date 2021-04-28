@@ -48,7 +48,7 @@ func loadData() Data {
   return data
 }
 
-func dataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
+func DataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
   return func(w http.ResponseWriter, r *http.Request) {
     if r.URL.Path != "/" {
       http.Error(w, "Invalid URL path, use root index", http.StatusNotFound)
@@ -145,7 +145,7 @@ func dataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
 func main() {
   data := loadData()
 
-  http.HandleFunc("/", dataHandler(data))
+  http.HandleFunc("/", DataHandler(data))
 
   log.Println("Starting server at port 8080")
   if err := http.ListenAndServe(":8080", nil); err != nil {
