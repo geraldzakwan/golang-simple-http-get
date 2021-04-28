@@ -84,7 +84,46 @@ func DataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
 
     idList := strings.Split(ids[0], ",")
 
-    // Case 2 and 3: Request with single or multiple ids
+    // Case 2: Request with single id
+    if len(idList) == 1 {
+      idx, err := strconv.Atoi(idList[0])
+
+      // Case 4: Request with invalid ID
+      if err != nil {
+        jsonError, err := json.Marshal(Error{
+          Code: http.StatusBadRequest,
+          Message: "Invalid or empty ID: \"" + idList[0] + "\"",
+        })
+
+        if err != nil {
+          http.Error(w, err.Error(), http.StatusInternalServerError)
+          return
+        }
+
+        w.WriteHeader(http.StatusBadRequest)
+        w.Write(jsonError)
+        return
+      }
+
+      // Case 5: Request with ID not found
+      if idx - 1 < 0 || idx - 1 > 2 {
+        jsonError, err := json.Marshal(Error{
+          Code: http.StatusNotFound,
+          Message: "Resource with ID: " + idList[0] + " doesn't exist",
+        })
+
+        if err != nil {
+          http.Error(w, err.Error(), http.StatusInternalServerError)
+          return
+        }
+
+        w.WriteHeader(http.StatusNotFound)
+        w.Write(jsonError)
+        return
+      }
+    }
+
+    // Case 3: Request with multiple ids
     var returnData Data
 
     for i := range idList {
@@ -107,23 +146,10 @@ func DataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
         return
       }
 
-      if idx - 1 < 0 || idx - 1 > 2 {
-        jsonError, err := json.Marshal(Error{
-          Code: http.StatusNotFound,
-          Message: "Resource with ID: " + idList[i] + " doesn't exist",
-        })
-
-        if err != nil {
-          http.Error(w, err.Error(), http.StatusInternalServerError)
-          return
-        }
-
-        w.WriteHeader(http.StatusNotFound)
-        w.Write(jsonError)
-        return
+      // Only return found ids
+      if idx - 1 > -1 && idx - 1 < 3 {
+        returnData = append(returnData, data[idx - 1])
       }
-
-      returnData = append(returnData, data[idx - 1])
     }
 
     jsonData, err := json.Marshal(Response{
