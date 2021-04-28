@@ -17,6 +17,16 @@ type Datum struct {
   Name string `json:"name"`
 }
 
+type Response struct {
+  Code int `json:"code"`
+  Data Data `json:"data"`
+}
+
+type Error struct {
+  Code int `json:"code"`
+  Message string `json:"message"`
+}
+
 func loadData() Data {
   jsonFile, err := os.Open("data.json")
   if err != nil {
@@ -57,12 +67,11 @@ func dataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
 
     // Case 1: Request without parameter id
     if ids == "" {
-      for i := range data {
-        log.Println(data[i].ID)
-        log.Println(data[i].Name)
-      }
+      jsonData, err := json.Marshal(Response{
+        Code: http.StatusOK,
+        Data: data,
+      })
 
-      jsonData, err := json.Marshal(data)
       if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
@@ -87,7 +96,11 @@ func dataHandler(data Data) func(w http.ResponseWriter, r *http.Request) {
       returnData = append(returnData, data[idx - 1])
     }
 
-    jsonData, err := json.Marshal(returnData)
+    jsonData, err := json.Marshal(Response{
+      Code: http.StatusOK,
+      Data: returnData,
+    })
+
     if err != nil {
       http.Error(w, err.Error(), http.StatusInternalServerError)
       return
